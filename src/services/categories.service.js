@@ -36,23 +36,39 @@ const getCategoryById = async (categoryId) => {
 
 // UPDATE CATEGORY BY ID
 const updateCategoryById = async (categoryId, updateData) => {
-  const category = await Category.findByIdAndUpdate(categoryId, updateData, {
-    returnDocument: 'after',
-    runValidators: true
-  })
-  if (!category) {
+  // Kiểm tra category tồn tại
+  const existing = await Category.findById(categoryId)
+  if (!existing) {
     throw { status: 404, message: 'Category không tồn tại' }
   }
+
+  // Kiểm tra isSystem
+  if (existing.isSystem) {
+    throw { status: 403, message: 'Đây là dữ liệu quan trọng không thể xóa hoặc chỉnh sửa' }
+  }
+
+  const category = await Category.findByIdAndUpdate(
+    categoryId,
+    { $set: updateData },
+    { returnDocument: 'after', runValidators: true }
+  )
   return category
 }
 
 // DELETE CATEGORY BY ID
 const deleteCategoryById = async (categoryId) => {
-  const category = await Category.findByIdAndDelete(categoryId)
-  if (!category) {
+  // Kiểm tra category tồn tại
+  const existing = await Category.findById(categoryId)
+  if (!existing) {
     throw { status: 404, message: 'Category không tồn tại' }
   }
-  return category
+
+  // Kiểm tra isSystem
+  if (existing.isSystem) {
+    throw { status: 403, message: 'Đây là dữ liệu quan trọng không thể xóa hoặc chỉnh sửa' }
+  }
+
+  await Category.findByIdAndDelete(categoryId)
 }
 
 module.exports = { createCategory, getCategoriesByUserId, getCategoryById, updateCategoryById, deleteCategoryById }

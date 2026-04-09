@@ -1,9 +1,9 @@
 // Tạo slug: bỏ dấu tiếng Việt, thay khoảng trắng bằng dấu -
 const generateSlug = (text) => {
   return text
-    .toLowerCase()
+    .toLowerCase()                      // chuyển sang chữ thường
     .normalize('NFD')                   // tách dấu ra khỏi chữ: ă → ă
-    .replace(/[\u0300-\u036f]/g, '')     // xoá dấu: ă → a
+    .replace(/[\u0300-\u036f]/g, '')    // xoá dấu: ă → a
     .replace(/đ/g, 'd')                 // đ → d
     .replace(/Đ/g, 'D')                 // Đ → D
     .replace(/[^a-z0-9\s-]/g, '')       // xoá ký tự đặc biệt

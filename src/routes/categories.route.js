@@ -15,6 +15,7 @@ router.get('/:id', verifyToken, categoryController.getCategoryById)
 
 // PUT /api/categories/:id (cập nhật category theo id)
 router.put('/:id', verifyToken, updateCategoryValidation, categoryController.updateCategory)
+
 // DELETE /api/categories/:id (xoá category theo id)
 router.delete('/:id', verifyToken, categoryController.deleteCategory)
 
