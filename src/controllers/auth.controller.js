@@ -5,11 +5,6 @@ const register = async (req, res) => {
   try {
     const { firstName, lastName, username, email, password, contactNumber, position } = req.body
 
-    // Validate input
-    if (!firstName || !lastName || !username || !email || !password) {
-      return res.status(400).json({ message: 'Vui lòng nhập đầy đủ thông tin' })
-    }
-
     const { user, accessToken, refreshToken } = await authService.register({
       firstName,
       lastName,
@@ -44,11 +39,6 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body
-
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Vui lòng nhập email và mật khẩu' })
-    }
-
     const { user, accessToken, refreshToken } = await authService.login({
       email,
       password
