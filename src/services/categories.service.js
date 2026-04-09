@@ -34,4 +34,25 @@ const getCategoryById = async (categoryId) => {
   return category
 }
 
-module.exports = { createCategory, getCategoriesByUserId, getCategoryById }
+// UPDATE CATEGORY BY ID
+const updateCategoryById = async (categoryId, updateData) => {
+  const category = await Category.findByIdAndUpdate(categoryId, updateData, {
+    returnDocument: 'after',
+    runValidators: true
+  })
+  if (!category) {
+    throw { status: 404, message: 'Category không tồn tại' }
+  }
+  return category
+}
+
+// DELETE CATEGORY BY ID
+const deleteCategoryById = async (categoryId) => {
+  const category = await Category.findByIdAndDelete(categoryId)
+  if (!category) {
+    throw { status: 404, message: 'Category không tồn tại' }
+  }
+  return category
+}
+
+module.exports = { createCategory, getCategoriesByUserId, getCategoryById, updateCategoryById, deleteCategoryById }

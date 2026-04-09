@@ -59,4 +59,44 @@ const getCategoryById = async (req, res) => {
   }
 }
 
-module.exports = { createCategory, getCategories, getCategoryById }
+// UPDATE CATEGORY BY ID
+const updateCategory = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { name, slug, order, isSystem } = req.body
+
+    const category = await categoryService.updateCategoryById(id, {
+      name,
+      slug,
+      order,
+      isSystem
+    })
+
+    return res.status(200).json({
+      message: 'Cập nhật category thành công',
+      category
+    })
+  } catch (error) {
+    return res.status(error.status || 500).json({
+      message: error.message || 'Lỗi server'
+    })
+  }
+}
+
+// DELETE CATEGORY BY ID
+const deleteCategory = async (req, res) => {
+  try {
+    const { id } = req.params
+    await categoryService.deleteCategoryById(id)
+
+    return res.status(200).json({
+      message: 'Xoá category thành công'
+    })
+  } catch (error) {
+    return res.status(error.status || 500).json({
+      message: error.message || 'Lỗi server'
+    })
+  }
+}
+
+module.exports = { createCategory, getCategories, getCategoryById, updateCategory, deleteCategory }
