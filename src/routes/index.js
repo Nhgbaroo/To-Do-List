@@ -2,11 +2,13 @@ const express = require('express')
 const router = express.Router()
 
 const authRoute = require('./auth.route')
+const userRoute = require('./users.route')
 const categoryRoute = require('./categories.route')
 const categoryValueRoute = require('./categoryValues.route')
 
 // Routes
 router.use('/api/auth', authRoute)
+router.use('/api/users', userRoute)
 router.use('/api/categories', categoryRoute)
 router.use('/api/category-values', categoryValueRoute)
 

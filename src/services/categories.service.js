@@ -8,6 +8,14 @@ const createCategory = async ({ name, slug, order, isSystem, userId }) => {
     throw { status: 409, message: 'Category với slug này đã tồn tại' }
   }
 
+  // Kiểm tra order đã tồn tại cho user này chưa
+  if (order !== undefined && order !== null) {
+    const existingOrder = await Category.findOne({ order, userId })
+    if (existingOrder) {
+      throw { status: 409, message: 'Order này đã tồn tại trong danh sách category' }
+    }
+  }
+
   const category = await Category.create({
     name,
     slug,
@@ -45,6 +53,14 @@ const updateCategoryById = async (categoryId, updateData) => {
   // Kiểm tra isSystem
   if (existing.isSystem) {
     throw { status: 403, message: 'Đây là dữ liệu quan trọng không thể xóa hoặc chỉnh sửa' }
+  }
+
+  // Kiểm tra order đã tồn tại cho user này chưa
+  if (updateData.order !== undefined && updateData.order !== null) {
+    const existingOrder = await Category.findOne({ order: updateData.order, userId: existing.userId })
+    if (existingOrder && existingOrder._id.toString() !== categoryId) {
+      throw { status: 409, message: 'Order này đã tồn tại trong danh sách category' }
+    }
   }
 
   const category = await Category.findByIdAndUpdate(
