@@ -25,4 +25,20 @@ const changePassword = async (userId, oldPassword, newPassword) => {
     await user.save()
 }
 
-module.exports = { getProfile, changePassword }
+// UPDATE PROFILE
+const updateProfile = async (userId, firstName, lastName, username, email, contactNumber, position) => {
+    const user = await User.findById(userId)
+    if (!user) {
+        throw { status: 404, message: 'Người dùng không tồn tại' }
+    }
+    user.firstName = firstName
+    user.lastName = lastName
+    user.username = username
+    user.email = email
+    user.contactNumber = contactNumber
+    user.position = position
+    await user.save()
+    return user
+}
+
+module.exports = { getProfile, changePassword, updateProfile }

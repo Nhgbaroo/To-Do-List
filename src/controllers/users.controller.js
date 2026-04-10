@@ -16,6 +16,23 @@ const getProfile = async (req, res) => {
     }
 }
 
+// UPDATE PROFILE
+const updateProfile = async (req, res) => {
+    try {
+        const userId = req.user._id
+        const { firstName, lastName, username, email, contactNumber, position, avatar } = req.body
+        const user = await userService.updateProfile(userId, firstName, lastName, username, email, contactNumber, position, avatar)
+        return res.status(200).json({
+            message: 'Cập nhật thông tin cá nhân thành công',
+            user
+        })
+    } catch (error) {
+        return res.status(error.status || 500).json({
+            message: error.message || 'Lỗi server'
+        })
+    }
+}
+
 // CHANGE PASSWORD
 const changePassword = async (req, res) => {
     try {
@@ -32,4 +49,4 @@ const changePassword = async (req, res) => {
     }
 }
 
-module.exports = { getProfile, changePassword }
+module.exports = { getProfile, changePassword, updateProfile }
