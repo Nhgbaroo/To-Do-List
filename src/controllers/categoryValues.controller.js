@@ -29,4 +29,46 @@ const createCategoryValue = async (req, res) => {
   }
 }
 
-module.exports = { createCategoryValue }
+// GET CATEGORY VALUES BY CATEGORY ID
+const getCategoryValuesByCategoryId = async (req, res) => {
+  try {
+    const { categoryId } = req.params
+    const userId = req.user._id
+
+    const categoryValues = await categoryValueService.getCategoryValuesByCategoryId({
+      categoryId,
+      userId
+    })
+
+    return res.status(200).json({
+      message: 'Lấy category values thành công',
+      categoryValues
+    })
+  } catch (error) {
+    return res.status(error.status || 500).json({
+      message: error.message || 'Lỗi server'
+    })
+  }
+}
+
+// GET ALL CATEGORY VALUES BY USER ID
+const getAllCategoryValuesByUserId = async (req, res) => {
+  try {
+    const userId = req.user._id
+
+    const categoryValues = await categoryValueService.getAllCategoryValuesByUserId({
+      userId
+    })
+
+    return res.status(200).json({
+      message: 'Lấy category values thành công',
+      categoryValues
+    })
+  } catch (error) {
+    return res.status(error.status || 500).json({
+      message: error.message || 'Lỗi server'
+    })
+  }
+}
+
+module.exports = { createCategoryValue, getCategoryValuesByCategoryId, getAllCategoryValuesByUserId }

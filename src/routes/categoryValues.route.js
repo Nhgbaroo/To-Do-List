@@ -7,4 +7,10 @@ const { createCategoryValueValidation } = require('../validations/categoryValues
 // POST /api/category-values/:categoryId
 router.post('/:categoryId', verifyToken, createCategoryValueValidation, categoryValueController.createCategoryValue)
 
+// GET /api/category-values/:categoryId
+router.get('/:categoryId', verifyToken, categoryValueController.getCategoryValuesByCategoryId)
+
+// GET /api/category-values
+router.get('/', verifyToken, categoryValueController.getAllCategoryValuesByUserId)
+
 module.exports = router

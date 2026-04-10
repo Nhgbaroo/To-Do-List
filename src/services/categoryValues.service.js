@@ -29,4 +29,24 @@ const createCategoryValue = async ({ name, slug, color, order, isSystem, isDefau
   return categoryValue
 }
 
-module.exports = { createCategoryValue }
+// GET CATEGORY VALUES BY CATEGORY ID
+const getCategoryValuesByCategoryId = async ({ categoryId, userId }) => {
+  // Kiểm tra category cha tồn tại và thuộc về user
+  const category = await Category.findOne({ _id: categoryId, userId })
+  if (!category) {
+    throw { status: 404, message: 'Category không tồn tại' }
+  }
+
+  const categoryValues = await CategoryValue.find({ categoryId })
+
+  return categoryValues
+}
+
+// GET ALL CATEGORY VALUES BY USER ID
+const getAllCategoryValuesByUserId = async ({ userId }) => {
+  const categoryValues = await CategoryValue.find({ userId })
+
+  return categoryValues
+}
+
+module.exports = { createCategoryValue, getCategoryValuesByCategoryId, getAllCategoryValuesByUserId }
