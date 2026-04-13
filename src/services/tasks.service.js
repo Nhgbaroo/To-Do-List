@@ -49,4 +49,10 @@ const createTask = async (userId, data, file) => {
     return newTask
 }
 
-module.exports = { createTask }
+// GET ALL TASKS
+const getAllTasks = async (userId) => {
+    const tasks = await Task.find({ userId })
+    return tasks
+}
+
+module.exports = { createTask, getAllTasks }

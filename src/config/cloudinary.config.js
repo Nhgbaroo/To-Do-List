@@ -13,7 +13,12 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: 'todo-list/tasks', // Thư mục lưu ảnh task trên cloudinary
+    folder: (req, file) => {
+      if (file.fieldname === 'avatar') {
+        return 'todo-list/users';
+      }
+      return 'todo-list/tasks';
+    },
     allowedFormats: ['jpeg', 'png', 'jpg', 'webp'],
   },
 });

@@ -56,6 +56,16 @@ const getAllCategoryValuesByUserId = async ({ userId }) => {
   return categoryValues
 }
 
+// GET CATEGORY VALUE BY ID
+const getCategoryValueById = async ({ categoryValueId, userId }) => {
+  const categoryValue = await CategoryValue.findOne({ _id: categoryValueId, userId })
+  if (!categoryValue) {
+    throw { status: 404, message: 'Category value không tồn tại' }
+  }
+
+  return categoryValue
+}
+
 // UPDATE CATEGORY VALUE BY ID
 const updateCategoryValueById = async ({ categoryValueId, name, slug, color, order, isSystem, isDefault, userId }) => {
   // Kiểm tra category value tồn tại và thuộc về user
@@ -103,4 +113,4 @@ const deleteCategoryValueById = async ({ categoryValueId, userId }) => {
   await CategoryValue.findByIdAndDelete(categoryValueId)
 }
 
-module.exports = { createCategoryValue, getCategoryValuesByCategoryId, getAllCategoryValuesByUserId, updateCategoryValueById, deleteCategoryValueById }
+module.exports = { createCategoryValue, getCategoryValuesByCategoryId, getAllCategoryValuesByUserId, getCategoryValueById, updateCategoryValueById, deleteCategoryValueById }

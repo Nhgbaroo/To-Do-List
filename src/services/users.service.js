@@ -41,4 +41,16 @@ const updateProfile = async (userId, firstName, lastName, username, email, conta
     return user
 }
 
-module.exports = { getProfile, changePassword, updateProfile }
+// UPDATE AVATAR
+const updateAvatar = async (userId, file) => {
+    const user = await User.findById(userId)
+    if (!user) {
+        throw { status: 404, message: 'Người dùng không tồn tại' }
+    }
+    user.avatar = file.path
+    user.avatarPublicId = file.filename
+    await user.save()
+    return user
+}
+
+module.exports = { getProfile, changePassword, updateProfile, updateAvatar }

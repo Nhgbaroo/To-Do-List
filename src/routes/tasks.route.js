@@ -8,4 +8,7 @@ const { uploadSingleImage } = require('../middlewares/upload.middleware')
 // POST /api/tasks
 router.post('/', verifyToken, uploadSingleImage('image'), createTaskValidation, tasksController.createTask)
 
+// GET /api/tasks
+router.get('/', verifyToken, tasksController.getAllTasks)
+
 module.exports = router

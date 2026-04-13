@@ -71,6 +71,28 @@ const getAllCategoryValuesByUserId = async (req, res) => {
   }
 }
 
+// GET CATEGORY VALUE BY ID
+const getCategoryValueById = async (req, res) => {
+  try {
+    const { categoryValueId } = req.params
+    const userId = req.user._id
+
+    const categoryValue = await categoryValueService.getCategoryValueById({
+      categoryValueId,
+      userId
+    })
+
+    return res.status(200).json({
+      message: 'Lấy category value thành công',
+      categoryValue
+    })
+  } catch (error) {
+    return res.status(error.status || 500).json({
+      message: error.message || 'Lỗi server'
+    })
+  }
+}
+
 // UPDATE CATEGORY VALUE BY ID
 const updateCategoryValueById = async (req, res) => {
   try {
@@ -121,4 +143,4 @@ const deleteCategoryValueById = async (req, res) => {
   }
 }
 
-module.exports = { createCategoryValue, getCategoryValuesByCategoryId, getAllCategoryValuesByUserId, updateCategoryValueById, deleteCategoryValueById }
+module.exports = { createCategoryValue, getCategoryValuesByCategoryId, getAllCategoryValuesByUserId, getCategoryValueById, updateCategoryValueById, deleteCategoryValueById }

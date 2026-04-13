@@ -14,6 +14,9 @@ router.get('/:categoryId', verifyToken, categoryValueController.getCategoryValue
 // GET /api/category-values
 router.get('/', verifyToken, categoryValueController.getAllCategoryValuesByUserId)
 
+// GET /api/category-values/detail/:categoryValueId
+router.get('/detail/:categoryValueId', verifyToken, categoryValueController.getCategoryValueById)
+
 // PUT /api/category-values/:categoryValueId
 router.put('/:categoryValueId', verifyToken, updateCategoryValidation, categoryValueController.updateCategoryValueById)
 
