@@ -1,5 +1,6 @@
 const User = require('../models/user.model')
 const bcrypt = require('bcryptjs')
+const { cloudinary } = require('../config/cloudinary.config')
 
 // GET PROFILE
 const getProfile = async (userId) => {
@@ -47,9 +48,17 @@ const updateAvatar = async (userId, file) => {
     if (!user) {
         throw { status: 404, message: 'Người dùng không tồn tại' }
     }
-    user.avatar = file.path
-    user.avatarPublicId = file.filename
-    await user.save()
+    
+    if (file) {
+        // Xóa ảnh cũ trên Cloudinary nếu có
+        if (user.avatarPublicId) {
+            await cloudinary.uploader.destroy(user.avatarPublicId)
+        }
+        user.avatar = file.path
+        user.avatarPublicId = file.filename
+        await user.save()
+    }
+    
     return user
 }
 

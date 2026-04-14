@@ -17,27 +17,11 @@ const createTask = async (req, res) => {
     }
 }
 
-// GET ALL TASKS
-const getAllTasks = async (req, res) => {
-    try {
-        const userId = req.user._id
-        const tasks = await tasksService.getAllTasks(userId)
-        return res.status(200).json({
-            message: 'Lấy danh sách task thành công',
-            tasks
-        })
-    } catch (error) {
-        return res.status(error.status || 500).json({
-            message: error.message || 'Lỗi server'
-        })
-    }
-}
-
 // UPDATE TASK
 const updateTask = async (req, res) => {
     try {
         const userId = req.user._id
-        const task = await tasksService.updateTask(userId, req.params.taskId, req.body, req.file)
+        const task = await tasksService.updateTask(userId, req.params.id, req.body, req.file)
         return res.status(200).json({
             message: 'Cập nhật task thành công',
             task
@@ -49,4 +33,4 @@ const updateTask = async (req, res) => {
     }
 }
 
-module.exports = { createTask, getAllTasks, updateTask }
+module.exports = { createTask, updateTask }

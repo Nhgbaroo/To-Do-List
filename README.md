@@ -1,6 +1,6 @@
-# 📝 ToDo List Build base source
+# 📝 ToDo List Backend API
 
-REST API cho ứng dụng quản lý công việc, xây dựng bằng Node.js, Express và MongoDB.
+REST API hoàn chỉnh cho ứng dụng quản lý công việc (ToDo List), được xây dựng bằng Node.js, Express và MongoDB.
 
 ## 🛠️ Công Nghệ Sử Dụng
 
@@ -9,35 +9,21 @@ REST API cho ứng dụng quản lý công việc, xây dựng bằng Node.js, E
 - **Database:** MongoDB (Mongoose ODM)
 - **Authentication:** JWT (Access Token + Refresh Token)
 - **Password Hashing:** bcryptjs
+- **File Upload:** Cloudinary & Multer (Hỗ trợ upload ảnh Task và Avatar)
 
 ## 📁 Cấu Trúc Thư Mục
 
 ```
 src/
-├── config/             # Cấu hình database, JWT
-│   ├── db.js
-│   └── jwt.js
-├── controllers/        # Xử lý request/response
-│   ├── auth.controller.js
-│   └── categories.controller.js
-├── middlewares/         # Xác thực token
-│   └── auth.middleware.js
-├── models/             # Mongoose schemas
-│   ├── user.model.js
-│   ├── categories.model.js
-│   ├── categoryValue.model.js
-│   └── task.model.js
+├── config/             # Cấu hình Database, Cloudinary, JWT
+├── controllers/        # Xử lý Request/Response cho từng module
+├── middlewares/        # Xác thực Token, Cấu hình Multer upload
+├── models/             # Mongoose Schemas (User, Task, Category, CategoryValue)
 ├── routes/             # Định nghĩa API endpoints
-│   ├── auth.route.js
-│   └── categories.route.js
-├── services/           # Business logic
-│   ├── auth.service.js
-│   └── categories.service.js
-├── validations/        # Kiểm tra dữ liệu đầu vào
-│   ├── auth.validation.js
-│   └── categories.validation.js
-├── app.js              # Cấu hình Express app
-└── index.js            # Entry point - khởi động server
+├── services/           # Business logic và tương tác Database
+├── validations/        # Kiểm tra và làm sạch dữ liệu đầu vào
+├── app.js              # Khởi tạo và cấu hình Express app
+└── index.js            # Entry point - Khởi động server
 ```
 
 ## 🚀 Cài Đặt & Chạy
@@ -55,124 +41,92 @@ cd ToDo-List
 npm install
 ```
 
-### 3. Tạo file `.env`
+### 3. Cấu hình biến môi trường `.env`
+
+Tạo file `.env` ở thư mục gốc và cung cấp các thông tin sau:
 
 ```env
-MONGODB_URI=mongodb://localhost:27017/test2
-PORT=3000
+PORT=
 NODE_ENV=development
+MONGODB_URI=
+
+# JWT Settings
 ACCESS_TOKEN_SECRET=your-access-token-secret-key
 REFRESH_TOKEN_SECRET=your-refresh-token-secret-key
+
+# Cloudinary Settings (Cho chức năng upload ảnh)
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 ```
 
-### 4. Chạy server
+### 4. Khởi chạy server
 
 ```bash
-# Development (tự restart khi code thay đổi)
+# Môi trường Development (Tự động reload khi sửa code)
 npm run dev
 
-# Production
+# Môi trường Production
 npm start
 ```
 
-Server chạy tại: `http://localhost:3000`
+Server sẽ chạy ở địa chỉ: `http://localhost:3000`
 
-## 📮 API Endpoints
+## 📮 Tổng Hợp Hệ Thống API Endpoints
 
-### Authentication
-
+### 🔐 Authentication (`/api/auth`)
 | Method | Endpoint | Mô tả | Auth |
 |--------|----------|--------|------|
-| POST | `/api/auth/register` | Đăng ký tài khoản | ❌ |
-| POST | `/api/auth/login` | Đăng nhập | ❌ |
-| POST | `/api/auth/logout` | Đăng xuất | ✅ |
-| POST | `/api/auth/refresh-token` | Làm mới access token | 🍪 Cookie |
+| POST | `/register` | Đăng ký tài khoản người dùng | ❌ |
+| POST | `/login` | Đăng nhập hệ thống | ❌ |
+| POST | `/logout` | Đăng xuất | ✅ |
+| POST | `/refresh-token` | Cấp lại access token mới qua cookie | 🍪 |
 
-### Categories
-
+### 👤 Users (`/api/users`)
 | Method | Endpoint | Mô tả | Auth |
 |--------|----------|--------|------|
-| POST | `/api/categories` | Tạo category mới | ✅ |
-| GET | `/api/categories` | Lấy tất cả categories của user | ✅ |
-| GET | `/api/categories/:id` | Lấy category theo ID | ✅ |
-| PUT | `/api/categories/:id` | Cập nhật category | ✅ |
-| DELETE | `/api/categories/:id` | Xoá category | ✅ |
+| GET | `/profile` | Xem thông tin cá nhân | ✅ |
+| PUT | `/profile` | Cập nhật thông tin cơ bản | ✅ |
+| PUT | `/avatar` | Cập nhật ảnh đại diện (Tự động xóa ảnh cũ trên Cloud) | ✅ |
+| PUT | `/change-password` | Thay đổi mật khẩu | ✅ |
 
-## 📋 Chi Tiết API
+### 📂 Categories (`/api/categories`)
+| Method | Endpoint | Mô tả | Auth |
+|--------|----------|--------|------|
+| POST | `/` | Tạo danh mục mới (VD: Status, Priority) | ✅ |
+| GET | `/` | Lấy danh sách các danh mục | ✅ |
+| PUT | `/:id` | Cập nhật danh mục | ✅ |
+| DELETE| `/:id` | Xóa danh mục | ✅ |
 
-### 🔐 Register
+### 🏷️ Category Values (`/api/category-values`)
+| Method | Endpoint | Mô tả | Auth |
+|--------|----------|--------|------|
+| POST | `/` | Thêm giá trị cho danh mục (VD: High, Low) | ✅ |
+| GET | `/category/:categoryId` | Lấy các giá trị thuộc một danh mục cụ thể | ✅ |
+| PUT | `/:categoryValueId`| Cập nhật giá trị danh mục | ✅ |
+| DELETE| `/:categoryValueId`| Xóa giá trị danh mục | ✅ |
 
-```
-POST /api/auth/register
-```
+### ✅ Tasks (`/api/tasks`)
+| Method | Endpoint | Mô tả | Auth |
+|--------|----------|--------|------|
+| POST | `/` | Tạo task mới (Hỗ trợ đính kèm ảnh) | ✅ |
+| GET | `/` | Lấy toàn bộ task hoặc Lọc Task (`?status=todo` or `?categoryId=id`) | ✅ |
+| GET | `/status/:status`| Lọc Task nhanh bằng Trạng thái (Hỗ trợ cả ID hoặc Slug) | ✅ |
+| GET | `/vital` | Lấy các Task quan trọng (isVital = true) | ✅ |
+| PUT | `/:id` | Cập nhật task (Thông tin, trạng thái, ảnh mới đính kèm) | ✅ |
 
-Body:
-```json
-{
-  "firstName": "Nguyen",
-  "lastName": "Van A",
-  "username": "nguyenvana",
-  "email": "nguyenvana@gmail.com",
-  "password": "123456",
-  "contactNumber": "0901234567",
-  "position": "Developer"
-}
-```
+## 🔒 Cơ Chế Authentication (JWT)
 
-### 🔑 Login
+1. **Login:** Đăng nhập thành công, nhận `accessToken` (json response) và `refreshToken` (được lưu tự động ở thẻ Set-Cookie an toàn).
+2. **Gọi API:** Frontend cần gắn Authorization Header: `Bearer <accessToken>`.
+3. **Refresh Token:** Khi `accessToken` hết hạn (VD sau 15 phút), frontend gọi HTTP POST `/api/auth/refresh-token`. Backend sẽ đọc Cookie, cấp Token mới mà không cần đăng nhập lại.
+4. **Bảo Mật:** Mật khẩu được mã hóa một chiều qua `bcryptjs`.
 
-```
-POST /api/auth/login
-```
+## 📦 Tổ Chức Database Models
 
-Body:
-```json
-{
-  "email": "nguyenvana@gmail.com",
-  "password": "123456"
-}
-```
+Hệ thống được thiết kế Restful Reference qua MongoDB ObjectId:
 
-Response:
-```json
-{
-  "message": "Đăng nhập thành công",
-  "user": { ... },
-  "accessToken": "eyJhbG..."
-}
-```
-
-> Refresh token được lưu trong httpOnly cookie.
-
-### 📂 Create Category
-
-```
-POST /api/categories
-Authorization: Bearer <accessToken>
-```
-
-Body:
-```json
-{
-  "name": "Công việc",
-  "order": 1
-}
-```
-
-> Slug tự động tạo từ name (bỏ dấu, thay khoảng trắng bằng `-`).
-
-## 🔒 Authentication Flow
-
-```
-1. Login → nhận accessToken (body) + refreshToken (cookie)
-2. Gọi API → gửi header: Authorization: Bearer <accessToken>
-3. Token hết hạn (15 phút) → gọi /refresh-token → nhận accessToken mới
-4. Refresh token hết hạn (7 ngày) → phải đăng nhập lại
-```
-
-## 📦 Database Models
-
-- **Users** — Thông tin tài khoản người dùng
-- **Categories** — Danh mục phân loại (thuộc về user)
-- **CategoryValues** — Giá trị của danh mục (ref đến Category)
-- **Tasks** — Công việc (ref đến User và CategoryValues)
+- **User**: Chứa thông tin định danh, avatar, credentials.
+- **Category**: Danh mục cha (Ví dụ: `Priority`, `Status`). Nối với User ID.
+- **CategoryValue**: Các tùy chọn cụ thể của loại Danh mục (Ví dụ Category Priority sẽ có giá trị như: `Low`, `Moderate`, `High`). Được liên kết với cả Category ID và User ID.
+- **Task**: Đại diện cho 1 công việc. Chứa `title`, `description`, `dueDate`, `isVital`, thông tin hình ảnh lưu tại _Cloudinary_ và một mảng `categoryIds` móc nối tới các lựa chọn thuộc `CategoryValue`.
