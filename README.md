@@ -31,7 +31,7 @@ src/
 ### 1. Clone project
 
 ```bash
-git clone https://github.com/<username>/ToDo-List.git
+git clone https://github.com/Nhgbaroo/To-Do-List.git
 cd ToDo-List
 ```
 
@@ -45,7 +45,7 @@ npm install
 
 Tạo file `.env` ở thư mục gốc và cung cấp các thông tin sau:
 
-```env
+.env
 PORT=
 NODE_ENV=development
 MONGODB_URI=
@@ -110,8 +110,8 @@ Server sẽ chạy ở địa chỉ: `http://localhost:3000`
 | Method | Endpoint | Mô tả | Auth |
 |--------|----------|--------|------|
 | POST | `/` | Tạo task mới (Hỗ trợ đính kèm ảnh) | ✅ |
-| GET | `/` | Lấy toàn bộ task hoặc Lọc Task (`?status=todo` or `?categoryId=id`) | ✅ |
-| GET | `/status/:status`| Lọc Task nhanh bằng Trạng thái (Hỗ trợ cả ID hoặc Slug) | ✅ |
+| GET | `/` | Lấy toàn bộ task theo UserID | ✅ |
+| GET | `/status/:status`| Lọc Task nhanh bằng Trạng thái | ✅ |
 | GET | `/vital` | Lấy các Task quan trọng (isVital = true) | ✅ |
 | PUT | `/:id` | Cập nhật task (Thông tin, trạng thái, ảnh mới đính kèm) | ✅ |
 

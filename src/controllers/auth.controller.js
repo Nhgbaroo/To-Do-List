@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken')
 const authService = require('../services/auth.service')
 
 // REGISTER

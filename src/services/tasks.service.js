@@ -114,4 +114,36 @@ const updateTask = async (userId, taskId, data, file) => {
     return updatedTask
 }
 
-module.exports = { createTask, updateTask }
+// GET ALL TASKS
+const getAllTasks = async (userId) => {
+    const tasks = await Task.find({ userId })
+    return tasks
+}
+
+// GET TASKS BY STATUS
+const getTasksByStatus = async (userId, status) => {
+    const filter = { userId }
+    const mongoose = require('mongoose');
+
+    if (mongoose.Types.ObjectId.isValid(status)) {
+        filter.categoryIds = status;
+    } else {
+        const statusValue = await CategoryValue.findOne({ slug: status, userId });
+        if (statusValue) {
+            filter.categoryIds = statusValue._id;
+        } else {
+            return [];
+        }
+    }
+
+    const tasks = await Task.find(filter)
+    return tasks
+}
+
+// GET VITAL TASKS
+const getVitalTasks = async (userId) => {
+    const tasks = await Task.find({ userId, isVital: true })
+    return tasks
+}
+
+module.exports = { createTask, updateTask, getAllTasks, getTasksByStatus, getVitalTasks }

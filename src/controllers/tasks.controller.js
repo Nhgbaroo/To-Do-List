@@ -33,4 +33,53 @@ const updateTask = async (req, res) => {
     }
 }
 
-module.exports = { createTask, updateTask }
+// GET ALL TASKS
+const getAllTasks = async (req, res) => {
+    try {
+        const userId = req.user._id
+        const tasks = await tasksService.getAllTasks(userId)
+        return res.status(200).json({
+            message: 'Lấy danh sách task thành công',
+            tasks
+        })
+    } catch (error) {
+        return res.status(error.status || 500).json({
+            message: error.message || 'Lỗi server'
+        })
+    }
+}
+
+// GET TASKS BY STATUS
+const getTasksByStatus = async (req, res) => {
+    try {
+        const userId = req.user._id
+        const tasks = await tasksService.getTasksByStatus(userId, req.params.status)
+        return res.status(200).json({
+            message: 'Lấy danh sách task theo trạng thái thành công',
+            tasks
+        })
+    } catch (error) {
+        return res.status(error.status || 500).json({
+            message: error.message || 'Lỗi server'
+        })
+    }
+}
+
+// GET VITAL TASKS
+const getVitalTasks = async (req, res) => {
+    try {
+        const userId = req.user._id
+        const tasks = await tasksService.getVitalTasks(userId)
+        return res.status(200).json({
+            message: 'Lấy danh sách task quan trọng thành công',
+            tasks
+        })
+    } catch (error) {
+        return res.status(error.status || 500).json({
+            message: error.message || 'Lỗi server'
+        })
+    }
+}
+
+
+module.exports = { createTask, updateTask, getAllTasks, getTasksByStatus, getVitalTasks }

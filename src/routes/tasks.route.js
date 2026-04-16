@@ -11,4 +11,13 @@ router.post('/', verifyToken, uploadSingleImage('image'), createTaskValidation, 
 // PUT /api/tasks/:id
 router.put('/:id', verifyToken, uploadSingleImage('image'), updateTaskValidation, tasksController.updateTask)
 
+// GET /api/tasks
+router.get('/', verifyToken, tasksController.getAllTasks)
+
+// GET /api/tasks/status/:status
+router.get('/status/:status', verifyToken, tasksController.getTasksByStatus)
+
+// GET /api/tasks/vital
+router.get('/vital', verifyToken, tasksController.getVitalTasks)
+
 module.exports = router
