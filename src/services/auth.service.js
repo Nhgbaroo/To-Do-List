@@ -22,26 +22,54 @@ const generateTokens = (userId) => {
 // REGISTER
 const register = async ({ firstName, lastName, username, email, password, contactNumber, position }) => {
   // Kiểm tra email hoặc username đã tồn tại
-  const existingUser = await User.findOne({
-    $or: [{ email }, { username }]
-  })
+  const orConditions = [{ email }, { username }]
+
+  // Kiểm tra contactNumber trùng lặp nếu người dùng có nhập
+  if (contactNumber) {
+    orConditions.push({ contactNumber })
+  }
+
+  const existingUser = await User.findOne({ $or: orConditions })
   if (existingUser) {
-    throw { status: 409, message: 'Email hoặc username đã tồn tại' }
+    if (existingUser.email === email) {
+      throw { status: 409, message: 'Email đã được sử dụng' }
+    }
+    if (existingUser.username === username) {
+      throw { status: 409, message: 'Username đã được sử dụng' }
+    }
+    if (contactNumber && existingUser.contactNumber === contactNumber) {
+      throw { status: 409, message: 'Số điện thoại đã được sử dụng' }
+    }
+    throw { status: 409, message: 'Thông tin đã tồn tại' }
   }
 
   // Hash password
   const hashedPassword = await bcrypt.hash(password, 10)
 
   // Tạo user
-  const user = await User.create({
-    firstName,
-    lastName,
-    username,
-    email,
-    password: hashedPassword,
-    contactNumber,
-    position
-  })
+  let user
+  try {
+    user = await User.create({
+      firstName,
+      lastName,
+      username,
+      email,
+      password: hashedPassword,
+      contactNumber: contactNumber || null,
+      position
+    })
+  } catch (err) {
+    if (err.code === 11000) {
+      const field = Object.keys(err.keyPattern || {})[0]
+      const messages = {
+        email: 'Email đã được sử dụng',
+        username: 'Username đã được sử dụng',
+        contactNumber: 'Số điện thoại đã được sử dụng'
+      }
+      throw { status: 409, message: messages[field] || 'Thông tin đã tồn tại' }
+    }
+    throw err
+  }
 
   // Tạo tokens
   const { accessToken, refreshToken } = generateTokens(user._id)

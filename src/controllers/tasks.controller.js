@@ -81,5 +81,35 @@ const getVitalTasks = async (req, res) => {
     }
 }
 
+// GET TASK BY ID
+const getTaskById = async (req, res) => {
+    try {
+        const userId = req.user._id
+        const task = await tasksService.getTaskById(userId, req.params.id)
+        return res.status(200).json({
+            message: 'Lấy task thành công',
+            task
+        })
+    } catch (error) {
+        return res.status(error.status || 500).json({
+            message: error.message || 'Lỗi server'
+        })
+    }
+}
 
-module.exports = { createTask, updateTask, getAllTasks, getTasksByStatus, getVitalTasks }
+// DELETE TASK
+const deleteTask = async (req, res) => {
+    try {
+        const userId = req.user._id
+        await tasksService.deleteTask(userId, req.params.id)
+        return res.status(200).json({
+            message: 'Xóa task thành công'
+        })
+    } catch (error) {
+        return res.status(error.status || 500).json({
+            message: error.message || 'Lỗi server'
+        })
+    }
+}
+
+module.exports = { createTask, updateTask, getAllTasks, getTasksByStatus, getVitalTasks, deleteTask, getTaskById }

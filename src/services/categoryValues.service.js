@@ -44,14 +44,14 @@ const getCategoryValuesByCategoryId = async ({ categoryId, userId }) => {
   if (!category) {
     throw { status: 404, message: 'Category không tồn tại' }
   }
-  const categoryValues = await CategoryValue.find({ categoryId })
+  const categoryValues = await CategoryValue.find({ categoryId }).sort({ order: 1 })
 
   return categoryValues
 }
 
 // GET ALL CATEGORY VALUES BY USER ID
 const getAllCategoryValuesByUserId = async ({ userId }) => {
-  const categoryValues = await CategoryValue.find({ userId })
+  const categoryValues = await CategoryValue.find({ userId }).sort({ order: 1 })
 
   return categoryValues
 }
@@ -72,6 +72,11 @@ const updateCategoryValueById = async ({ categoryValueId, name, slug, color, ord
   const categoryValue = await CategoryValue.findOne({ _id: categoryValueId, userId })
   if (!categoryValue) {
     throw { status: 404, message: 'Category value không tồn tại' }
+  }
+
+  // Kiểm tra isSystem
+  if (categoryValue.isSystem) {
+    throw { status: 403, message: 'Đây là dữ liệu quan trọng không thể xóa hoặc chỉnh sửa' }
   }
 
   // Kiểm tra slug đã tồn tại trong category này chưa

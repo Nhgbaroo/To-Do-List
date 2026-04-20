@@ -23,7 +23,7 @@ const changePasswordValidation = (req, res, next) => {
 
 // UPDATE PROFILE
 const updateProfileValidation = (req, res, next) => {
-    const { firstName, lastName, username, email, contactNumber, position } = req.body
+    const { firstName, lastName, username, email, contactNumber } = req.body
 
     if (!firstName) {
         return res.status(400).json({ message: 'Vui lòng nhập tên' })
@@ -37,16 +37,27 @@ const updateProfileValidation = (req, res, next) => {
         return res.status(400).json({ message: 'Vui lòng nhập tên đăng nhập' })
     }
 
+    if (username.length < 3) {
+        return res.status(400).json({ message: 'Username phải có ít nhất 3 ký tự' })
+    }
+
     if (!email) {
         return res.status(400).json({ message: 'Vui lòng nhập email' })
     }
 
-    if (!contactNumber) {
-        return res.status(400).json({ message: 'Vui lòng nhập số điện thoại' })
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: 'Email không đúng định dạng' })
     }
 
-    if (!position) {
-        return res.status(400).json({ message: 'Vui lòng nhập chức vụ' })
+    // contactNumber là tùy chọn, chỉ validate format nếu có nhập
+    if (contactNumber) {
+        if (!/^\d+$/.test(contactNumber)) {
+            return res.status(400).json({ message: 'Số điện thoại chỉ được chứa số' })
+        }
+        if (contactNumber.length > 15) {
+            return res.status(400).json({ message: 'Số điện thoại không được vượt quá 15 ký tự' })
+        }
     }
 
     next()

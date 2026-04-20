@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const { ACCESS_TOKEN_SECRET } = require('../config/jwt')
 const User = require('../models/user.model')
+const { isBlacklisted } = require('../services/tokenBlacklist.service')
 
 const verifyToken = async (req, res, next) => {
   try {
@@ -12,11 +13,17 @@ const verifyToken = async (req, res, next) => {
 
     const token = authHeader.split(' ')[1]
 
+    // Kiểm tra token có bị blacklist không (đã logout)
+    const blacklisted = await isBlacklisted(token)
+    if (blacklisted) {
+      return res.status(401).json({ message: 'Bạn đã đăng xuất hoặc đã hết hạn thực hiện yêu cầu' })
+    }
+
     // Verify token
     const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET)
 
     // Kiểm tra user còn tồn tại
-    const user = await User.findById(decoded.userId).select('-password')
+    const user = await User.findById(decoded.userId).select('-password').lean()
     if (!user) {
       return res.status(401).json({ message: 'User không tồn tại' })
     }

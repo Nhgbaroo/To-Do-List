@@ -14,10 +14,16 @@ router.put('/:id', verifyToken, uploadSingleImage('image'), updateTaskValidation
 // GET /api/tasks
 router.get('/', verifyToken, tasksController.getAllTasks)
 
+// GET /api/tasks/:id
+router.get('/:id', verifyToken, tasksController.getTaskById)
+
 // GET /api/tasks/status/:status
 router.get('/status/:status', verifyToken, tasksController.getTasksByStatus)
 
 // GET /api/tasks/vital
 router.get('/vital', verifyToken, tasksController.getVitalTasks)
+
+// DELETE /api/tasks/:id
+router.delete('/:id', verifyToken, tasksController.deleteTask)
 
 module.exports = router

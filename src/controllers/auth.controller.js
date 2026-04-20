@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const authService = require('../services/auth.service')
+const tokenBlacklistService = require('../services/tokenBlacklist.service')
 
 // REGISTER
 const register = async (req, res) => {
@@ -68,6 +69,18 @@ const login = async (req, res) => {
 // LOGOUT
 const logout = async (req, res) => {
   try {
+    // Lấy accessToken từ header
+    const authHeader = req.headers.authorization
+    const accessToken = authHeader.split(' ')[1]
+
+    // Decode token để lấy thời gian hết hạn (exp)
+    const decoded = jwt.decode(accessToken)
+
+    // Thêm accessToken vào blacklist với TTL = thời gian còn lại
+    if (decoded?.exp) {
+      await tokenBlacklistService.addToBlacklist(accessToken, decoded.exp)
+    }
+
     // Xoá refreshToken cookie
     res.clearCookie('refreshToken', {
       httpOnly: true,
