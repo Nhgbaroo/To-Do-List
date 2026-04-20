@@ -4,26 +4,37 @@ REST API hoàn chỉnh cho ứng dụng quản lý công việc (ToDo List), đ�
 
 ## 🛠️ Công Nghệ Sử Dụng
 
-- **Runtime:** Node.js
-- **Framework:** Express.js
-- **Database:** MongoDB (Mongoose ODM)
-- **Authentication:** JWT (Access Token + Refresh Token)
-- **Password Hashing:** bcryptjs
-- **File Upload:** Cloudinary & Multer (Hỗ trợ upload ảnh Task và Avatar)
+| Thành phần | Công nghệ |
+|---|---|
+| **Runtime** | Node.js (với `--watch` mode) |
+| **Framework** | Express.js v5 |
+| **Database** | MongoDB (Mongoose ODM v9) |
+| **Cache / Blacklist** | Redis (ioredis) |
+| **Authentication** | JWT — Access Token + Refresh Token |
+| **Password Hashing** | bcryptjs |
+| **File Upload** | Multer + Cloudinary (ảnh Task & Avatar) |
 
 ## 📁 Cấu Trúc Thư Mục
 
 ```
-src/
-├── config/             # Cấu hình Database, Cloudinary, JWT
-├── controllers/        # Xử lý Request/Response cho từng module
-├── middlewares/        # Xác thực Token, Cấu hình Multer upload
-├── models/             # Mongoose Schemas (User, Task, Category, CategoryValue)
-├── routes/             # Định nghĩa API endpoints
-├── services/           # Business logic và tương tác Database
-├── validations/        # Kiểm tra và làm sạch dữ liệu đầu vào
-├── app.js              # Khởi tạo và cấu hình Express app
-└── index.js            # Entry point - Khởi động server
+ToDo-List/
+├── src/
+│   ├── config/
+│   │   ├── db.js                   # Kết nối MongoDB
+│   │   ├── redis.js                # Kết nối Redis (Token Blacklist)
+│   │   ├── cloudinary.config.js    # Cấu hình Cloudinary & Multer storage
+│   │   └── jwt.js                  # Hàm tiện ích tạo/xác thực JWT
+│   ├── controllers/                # Xử lý Request/Response cho từng module
+│   ├── middlewares/                # Xác thực Token, Cấu hình Multer upload
+│   ├── models/                     # Mongoose Schemas (User, Task, Category, CategoryValue)
+│   ├── routes/                     # Định nghĩa API endpoints
+│   ├── services/                   # Business logic và tương tác Database
+│   ├── validations/                # Kiểm tra và làm sạch dữ liệu đầu vào
+│   ├── app.js                      # Khởi tạo và cấu hình Express app
+│   └── index.js                    # Entry point — Khởi động server
+├── .env                            # Biến môi trường (không commit)
+├── .gitignore
+└── package.json
 ```
 
 ## 🚀 Cài Đặt & Chạy
@@ -32,7 +43,7 @@ src/
 
 ```bash
 git clone https://github.com/Nhgbaroo/To-Do-List.git
-cd ToDo-List
+cd To-Do-List
 ```
 
 ### 2. Cài đặt dependencies
@@ -43,18 +54,25 @@ npm install
 
 ### 3. Cấu hình biến môi trường `.env`
 
-Tạo file `.env` ở thư mục gốc và cung cấp các thông tin sau:
+Tạo file `.env` ở thư mục gốc:
 
-.env
-PORT=
+```env
+PORT=3000
 NODE_ENV=development
-MONGODB_URI=
 
-# JWT Settings
+# MongoDB
+MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/todo-list
+
+# JWT
 ACCESS_TOKEN_SECRET=your-access-token-secret-key
+ACCESS_TOKEN_EXPIRES_IN=15m
 REFRESH_TOKEN_SECRET=your-refresh-token-secret-key
+REFRESH_TOKEN_EXPIRES_IN=7d
 
-# Cloudinary Settings (Cho chức năng upload ảnh)
+# Redis (Token Blacklist)
+REDIS_URL=redis://localhost:6379
+
+# Cloudinary (Upload ảnh Task & Avatar)
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
@@ -63,70 +81,134 @@ CLOUDINARY_API_SECRET=your_api_secret
 ### 4. Khởi chạy server
 
 ```bash
-# Môi trường Development (Tự động reload khi sửa code)
+# Development (tự reload khi sửa code)
 npm run dev
 
-# Môi trường Production
+# Production
 npm start
 ```
 
-Server sẽ chạy ở địa chỉ: `http://localhost:3000`
+> Server chạy tại: `http://localhost:3000`
+>
+> ⚠️ **Yêu cầu:** Redis phải đang chạy trước khi khởi động server (dùng cho Token Blacklist).
 
-## 📮 Tổng Hợp Hệ Thống API Endpoints
+---
 
-### 🔐 Authentication (`/api/auth`)
-| Method | Endpoint | Mô tả | Auth |
-|--------|----------|--------|------|
-| POST | `/register` | Đăng ký tài khoản người dùng | ❌ |
-| POST | `/login` | Đăng nhập hệ thống | ❌ |
-| POST | `/logout` | Đăng xuất | ✅ |
-| POST | `/refresh-token` | Cấp lại access token mới qua cookie | 🍪 |
+## 📮 API Endpoints
 
-### 👤 Users (`/api/users`)
-| Method | Endpoint | Mô tả | Auth |
-|--------|----------|--------|------|
-| GET | `/profile` | Xem thông tin cá nhân | ✅ |
-| PUT | `/profile` | Cập nhật thông tin cơ bản | ✅ |
-| PUT | `/avatar` | Cập nhật ảnh đại diện (Tự động xóa ảnh cũ trên Cloud) | ✅ |
-| PUT | `/change-password` | Thay đổi mật khẩu | ✅ |
+Base URL: `/api`
 
-### 📂 Categories (`/api/categories`)
-| Method | Endpoint | Mô tả | Auth |
-|--------|----------|--------|------|
-| POST | `/` | Tạo danh mục mới (VD: Status, Priority) | ✅ |
-| GET | `/` | Lấy danh sách các danh mục | ✅ |
-| PUT | `/:id` | Cập nhật danh mục | ✅ |
-| DELETE| `/:id` | Xóa danh mục | ✅ |
+### 🔐 Authentication — `/api/auth`
 
-### 🏷️ Category Values (`/api/category-values`)
-| Method | Endpoint | Mô tả | Auth |
-|--------|----------|--------|------|
-| POST | `/` | Thêm giá trị cho danh mục (VD: High, Low) | ✅ |
-| GET | `/category/:categoryId` | Lấy các giá trị thuộc một danh mục cụ thể | ✅ |
-| PUT | `/:categoryValueId`| Cập nhật giá trị danh mục | ✅ |
-| DELETE| `/:categoryValueId`| Xóa giá trị danh mục | ✅ |
+| Method | Endpoint | Mô tả | Yêu cầu Auth |
+|--------|----------|--------|:---:|
+| `POST` | `/register` | Đăng ký tài khoản mới | ❌ |
+| `POST` | `/login` | Đăng nhập, nhận `accessToken` + `refreshToken` cookie | ❌ |
+| `POST` | `/logout` | Đăng xuất, blacklist `accessToken` trong Redis | ✅ |
+| `POST` | `/refresh-token` | Cấp `accessToken` mới qua `refreshToken` cookie | 🍪 |
 
-### ✅ Tasks (`/api/tasks`)
-| Method | Endpoint | Mô tả | Auth |
-|--------|----------|--------|------|
-| POST | `/` | Tạo task mới (Hỗ trợ đính kèm ảnh) | ✅ |
-| GET | `/` | Lấy toàn bộ task theo UserID | ✅ |
-| GET | `/status/:status`| Lọc Task nhanh bằng Trạng thái | ✅ |
-| GET | `/vital` | Lấy các Task quan trọng (isVital = true) | ✅ |
-| PUT | `/:id` | Cập nhật task (Thông tin, trạng thái, ảnh mới đính kèm) | ✅ |
+### 👤 Users — `/api/users`
 
-## 🔒 Cơ Chế Authentication (JWT)
+| Method | Endpoint | Mô tả | Yêu cầu Auth |
+|--------|----------|--------|:---:|
+| `GET` | `/profile` | Lấy thông tin cá nhân | ✅ |
+| `PUT` | `/profile` | Cập nhật thông tin cơ bản (họ tên, v.v.) | ✅ |
+| `PUT` | `/avatar` | Cập nhật avatar (tự động xóa ảnh cũ trên Cloudinary) | ✅ |
+| `PUT` | `/change-password` | Thay đổi mật khẩu | ✅ |
 
-1. **Login:** Đăng nhập thành công, nhận `accessToken` (json response) và `refreshToken` (được lưu tự động ở thẻ Set-Cookie an toàn).
-2. **Gọi API:** Frontend cần gắn Authorization Header: `Bearer <accessToken>`.
-3. **Refresh Token:** Khi `accessToken` hết hạn (VD sau 15 phút), frontend gọi HTTP POST `/api/auth/refresh-token`. Backend sẽ đọc Cookie, cấp Token mới mà không cần đăng nhập lại.
-4. **Bảo Mật:** Mật khẩu được mã hóa một chiều qua `bcryptjs`.
+### 📂 Categories — `/api/categories`
 
-## 📦 Tổ Chức Database Models
+| Method | Endpoint | Mô tả | Yêu cầu Auth |
+|--------|----------|--------|:---:|
+| `POST` | `/` | Tạo danh mục mới (VD: `Status`, `Priority`) | ✅ |
+| `GET` | `/` | Lấy danh sách tất cả danh mục của user | ✅ |
+| `PUT` | `/:id` | Cập nhật danh mục | ✅ |
+| `DELETE` | `/:id` | Xóa danh mục | ✅ |
 
-Hệ thống được thiết kế Restful Reference qua MongoDB ObjectId:
+### 🏷️ Category Values — `/api/category-values`
 
-- **User**: Chứa thông tin định danh, avatar, credentials.
-- **Category**: Danh mục cha (Ví dụ: `Priority`, `Status`). Nối với User ID.
-- **CategoryValue**: Các tùy chọn cụ thể của loại Danh mục (Ví dụ Category Priority sẽ có giá trị như: `Low`, `Moderate`, `High`). Được liên kết với cả Category ID và User ID.
-- **Task**: Đại diện cho 1 công việc. Chứa `title`, `description`, `dueDate`, `isVital`, thông tin hình ảnh lưu tại _Cloudinary_ và một mảng `categoryIds` móc nối tới các lựa chọn thuộc `CategoryValue`.
+| Method | Endpoint | Mô tả | Yêu cầu Auth |
+|--------|----------|--------|:---:|
+| `POST` | `/:categoryId` | Thêm giá trị cho danh mục (VD: `High`, `Low`) | ✅ |
+| `GET` | `/` | Lấy toàn bộ giá trị danh mục của user | ✅ |
+| `GET` | `/detail/:categoryValueId` | Lấy chi tiết một giá trị danh mục theo ID | ✅ |
+| `GET` | `/:categoryId` | Lấy tất cả giá trị thuộc một danh mục cụ thể | ✅ |
+| `PUT` | `/:categoryValueId` | Cập nhật giá trị danh mục | ✅ |
+| `DELETE` | `/:categoryValueId` | Xóa giá trị danh mục | ✅ |
+
+### ✅ Tasks — `/api/tasks`
+
+| Method | Endpoint | Mô tả | Yêu cầu Auth |
+|--------|----------|--------|:---:|
+| `POST` | `/` | Tạo task mới (hỗ trợ đính kèm ảnh) | ✅ |
+| `GET` | `/` | Lấy toàn bộ task của user hiện tại | ✅ |
+| `GET` | `/:id` | Lấy chi tiết một task theo ID | ✅ |
+| `GET` | `/vital` | Lấy các task quan trọng (`isVital = true`) | ✅ |
+| `GET` | `/status/:status` | Lọc task theo trạng thái | ✅ |
+| `PUT` | `/:id` | Cập nhật task (nội dung, danh mục, ảnh mới) | ✅ |
+| `DELETE` | `/:id` | Xóa task (tự động xóa ảnh trên Cloudinary nếu có) | ✅ |
+
+---
+
+## 🔒 Cơ Chế Authentication
+
+```
+Client                          Server
+  │                               │
+  ├──── POST /login ──────────────►│
+  │                               │── Tạo accessToken (15m) + refreshToken (7d)
+  │◄─── accessToken (body) ───────┤
+  │◄─── refreshToken (Set-Cookie)─┤
+  │                               │
+  ├──── GET /api/* ───────────────►│ Header: Authorization: Bearer <accessToken>
+  │◄─── Response data ────────────┤
+  │                               │
+  ├──── POST /refresh-token ──────►│ Tự động gửi cookie
+  │◄─── accessToken mới (body) ───┤
+  │                               │
+  ├──── POST /logout ─────────────►│
+  │                               │── Lưu accessToken vào Redis Blacklist (TTL tự hết hạn)
+  │◄─── 200 OK ───────────────────┤
+```
+
+- **Token Blacklist:** Khi logout, `accessToken` được lưu vào Redis với TTL bằng thời gian còn lại của token. Mọi request tiếp theo dùng token đó sẽ bị từ chối ngay cả khi token chưa hết hạn.
+- **Bảo mật mật khẩu:** Hash một chiều bằng `bcryptjs`, không bao giờ trả về trong response.
+
+---
+
+## 🗄️ Database Models
+
+```
+User
+ ├── _id, username, email, password (hashed)
+ └── avatar { public_id, url }
+
+Category
+ ├── _id, name, order
+ └── userId → User
+
+CategoryValue
+ ├── _id, value, order
+ ├── categoryId → Category
+ └── userId → User
+
+Task
+ ├── _id, title, description, dueDate
+ ├── isVital (Boolean)
+ ├── image { public_id, url }
+ ├── categoryIds [ → CategoryValue ]
+ └── userId → User
+```
+
+- **Category** → Danh mục cha (VD: `Priority`, `Status`).
+- **CategoryValue** → Các tùy chọn của mỗi danh mục (VD: `Priority` → `Low`, `Moderate`, `High`).
+- **Task** → Công việc, liên kết nhiều `CategoryValue` qua mảng `categoryIds`.
+
+---
+
+## 📦 Scripts
+
+```bash
+npm run dev     # Chạy development server (Node.js --watch, auto-reload)
+npm start       # Chạy production server
+```

@@ -1,6 +1,15 @@
 const jwt = require('jsonwebtoken')
 const authService = require('../services/auth.service')
 const tokenBlacklistService = require('../services/tokenBlacklist.service')
+const { REFRESH_TOKEN_EXPIRES_MS } = require('../config/jwt')
+
+// Tập trung cookie options để tránh lặp lại
+const getRefreshTokenCookieOptions = () => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict',
+  maxAge: REFRESH_TOKEN_EXPIRES_MS
+})
 
 // REGISTER
 const register = async (req, res) => {
@@ -17,13 +26,7 @@ const register = async (req, res) => {
       position
     })
 
-    // Set refreshToken vào httpOnly cookie
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 ngày
-    })
+    res.cookie('refreshToken', refreshToken, getRefreshTokenCookieOptions())
 
     return res.status(201).json({
       message: 'Đăng ký thành công',
@@ -41,18 +44,9 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body
-    const { user, accessToken, refreshToken } = await authService.login({
-      email,
-      password
-    })
+    const { user, accessToken, refreshToken } = await authService.login({ email, password })
 
-    // Set refreshToken vào httpOnly cookie
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000
-    })
+    res.cookie('refreshToken', refreshToken, getRefreshTokenCookieOptions())
 
     return res.status(200).json({
       message: 'Đăng nhập thành công',
@@ -69,19 +63,16 @@ const login = async (req, res) => {
 // LOGOUT
 const logout = async (req, res) => {
   try {
-    // Lấy accessToken từ header
     const authHeader = req.headers.authorization
     const accessToken = authHeader.split(' ')[1]
 
-    // Decode token để lấy thời gian hết hạn (exp)
+    // Decode token để lấy thời gian hết hạn (exp), rồi blacklist
     const decoded = jwt.decode(accessToken)
-
-    // Thêm accessToken vào blacklist với TTL = thời gian còn lại
     if (decoded?.exp) {
       await tokenBlacklistService.addToBlacklist(accessToken, decoded.exp)
     }
 
-    // Xoá refreshToken cookie
+    // Xoá refreshToken cookie (dùng cùng path/domain để khớp)
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -102,13 +93,7 @@ const refreshToken = async (req, res) => {
     const { user, accessToken, refreshToken: newRefreshToken } =
       await authService.refreshToken(token)
 
-    // Set refreshToken mới vào cookie
-    res.cookie('refreshToken', newRefreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000
-    })
+    res.cookie('refreshToken', newRefreshToken, getRefreshTokenCookieOptions())
 
     return res.status(200).json({
       message: 'Refresh token thành công',

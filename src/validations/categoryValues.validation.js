@@ -1,15 +1,4 @@
-const generateSlug = (text) => {
-  return text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/đ/g, 'd')
-    .replace(/Đ/g, 'D')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-}
+const { generateSlug } = require('../utils/slug')
 
 // CREATE CATEGORY VALUE
 const createCategoryValueValidation = (req, res, next) => {

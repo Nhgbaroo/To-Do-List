@@ -35,6 +35,7 @@ const createTask = async (userId, data, file) => {
     // Xử lý ảnh nếu có (multer-storage-cloudinary)
     let imageUrl = null
     let imagePublicId = null
+
     if (file) {
         imageUrl = file.path
         imagePublicId = file.filename

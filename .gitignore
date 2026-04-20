@@ -1,2 +1,13 @@
+# Dependencies
+node_modules/
+
+# Environment variables (chứa secrets — KHÔNG commit)
 .env
-node_modules
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+
+
